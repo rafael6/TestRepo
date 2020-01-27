@@ -12,14 +12,18 @@ import requests
 from ipaddress import IPv4Address, IPv4Network
 
 def get_json(cloud, prefix_list):
+    assert (type(prefix_list is list)), 'prefix_list must be a list object'
     try:
         print(json.dumps({cloud: prefix_list}, indent=4))
     except ValueError as e:
+        print(e)
+    except AssertionError as e:
         print(e)
 
 
 def aws(ip):
     # [] if no match
+    assert (type(ip) is str), 'IP must be an str object.'
     try:
         cloud = 'AWS'
         ip_ranges = requests.get('https://ip-ranges.amazonaws.com/ip-ranges.json').json()['prefixes'] # type list
@@ -28,10 +32,15 @@ def aws(ip):
         get_json(cloud, filtered_list)
     except ipaddress.AddressValueError as e:
         print(e)
+    except ValueError as e:
+        print(e)
+    except AssertionError as e:
+        print(e)
 
 
 def azure_public(ip):
     # [] if no match
+    assert (type(ip) is str), 'IP must be an str object.'
     try:
         az_public = requests.get('https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20200121.json').json()
         cloud = 'AzurePublic'
@@ -40,18 +49,26 @@ def azure_public(ip):
         get_json(cloud, filtered_list)
     except ipaddress.AddressValueError as e:
         print(e)
+    except ValueError as e:
+        print(e)
+    except AssertionError as e:
+        print(e)
 
 
 def azure_gov(ip):
     # [] if no match
+    assert (type(ip) is str), 'IP must be an str object.'
     try:
-        #az_public = requests.get('https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20200121.json').json()
         az_gov = requests.get('https://download.microsoft.com/download/6/4/D/64DB03BF-895B-4173-A8B1-BA4AD5D4DF22/ServiceTags_AzureGovernment_20200121.json').json()
         cloud = 'AzureGov'
         properties_list = [i['properties'] for i in az_gov['values']]
         filtered_list = [{'addressPrefixes': j, 'systemService': i['systemService'], 'region': i['region']} for i in properties_list for j in i['addressPrefixes'] if IPv4Address(ip) in IPv4Network(j)]
         get_json(cloud, filtered_list)
     except ipaddress.AddressValueError as e:
+        print(e)
+    except ValueError as e:
+        print(e)
+    except AssertionError as e:
         print(e)
 
 
