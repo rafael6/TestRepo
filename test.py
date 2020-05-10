@@ -121,7 +121,5 @@ def main():
     azure_gov(ip)
     azure_public(ip )
 
-
-
 if __name__ == "__main__":
     main()
