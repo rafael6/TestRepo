@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 
+# TODO: chmod +x test.py
+# TODO: remove get_o365_change_history() fuction
+
 '''
 print(IPv4Address('192.0.3.6') in IPv4Network('192.0.2.0/28'))
 True/False
 ipaddress.AddressValueError:
+
+        aws_ip = '54.250.251.1'
+        azure_gov_ip = '52.127.26.97'
+        azure_public_ip = '40.79.178.97'
 '''
 
+import argparse
 import ipaddress
 import json
 import requests
@@ -22,7 +30,6 @@ substring_begining = resp.text.find('ServiceTags_AzureGovernment_2')
 substring_end = substring_begining + 28
 publication_date = resp.text[substring_end: substring_end + 8]
 
-
 def get_json(cloud, prefix_list):
     assert (type(prefix_list is list)), 'prefix_list must be a list object'
     try:
@@ -32,9 +39,7 @@ def get_json(cloud, prefix_list):
     except AssertionError as e:
         print(e)
 
-
 def aws(ip):
-    # [] if no match
     assert (type(ip) is str), 'IP must be an str object.'
     try:
         cloud = 'AWS'
@@ -42,16 +47,12 @@ def aws(ip):
         #all_prefixes_json = json.dumps(ip_ranges, indent=4) # type string
         filtered_list = [i for i in ip_ranges if IPv4Address(ip) in IPv4Network(i['ip_prefix'])]
         get_json(cloud, filtered_list)
-    except ipaddress.AddressValueError as e:
-        print(e)
     except ValueError as e:
         print(e)
     except AssertionError as e:
         print(e)
 
-
 def azure_public(ip):
-    # [] if no match
     assert (type(ip) is str), 'IP must be an str object.'
     try:
         az_public = requests.get(f'https://download.microsoft.com/download' \
@@ -70,16 +71,12 @@ def azure_public(ip):
                 if IPv4Address(ip) in IPv4Network(j)
                 ]
         get_json(cloud, filtered_list)
-    except ipaddress.AddressValueError as e:
-        print(e)
     except ValueError as e:
         print(e)
     except AssertionError as e:
         print(e)
 
-
 def azure_gov(ip):
-    # [] if no match
     assert (type(ip) is str), 'IP must be an str object.'
     try:
         az_gov = requests.get('https://download.microsoft.com/download/6/4/D/' \
@@ -98,8 +95,6 @@ def azure_gov(ip):
                 if IPv4Address(ip) in IPv4Network(j)
                 ]
         get_json(cloud, filtered_list)
-    except ipaddress.AddressValueError as e:
-        print(e)
     except ValueError as e:
         print(e)
     except AssertionError as e:
@@ -115,16 +110,16 @@ def get_o365_change_history():
     except ValueError as e:
         print(e)
 
-
 def main():
-    ip = '54.250.251.1'
-    aws_ip = '54.250.251.1'
-    azure_gov_ip = '52.127.26.97'
-    azure_public_ip = '40.79.178.97'
-    #aws(aws_ip)
-    azure_gov(azure_gov_ip)
-    #azure_public(azure_public_ip )
-    #get_o365_change_history()
+    parser = argparse.ArgumentParser(description='Find cloud provider for IP.')
+    parser.add_argument('ip',
+                        type=str,
+                        help='IPv4 address in question')
+    args = parser.parse_args()
+    ip = args.ip
+    aws(ip)
+    azure_gov(ip)
+    azure_public(ip )
 
 if __name__ == "__main__":
     main()
